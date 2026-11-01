@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>استودیوی ویدیوی اِما | استودیو ریلز</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- کتابخانه‌های ضروری و پایدار -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/build/mp4-muxer.js"></script>
+<style>
+:root{
+  --bg:#090b11;--fg:#f1f5f9;--mut:#8894a8;--card:#111520;--border:rgba(255,255,255,.08);
+  --line:rgba(255,255,255,.12);--ai:#0284c7;--ai-glow:#38bdf8;--hu:#f43f5e;--hu-glow:#fb7185;
+  --rad:16px;color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 14px/1.7 Vazirmatn,system-ui,sans-serif;min-height:100vh}
+main{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+.header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px}
+h1{font-size:24px;font-weight:800;margin:0;background:linear-gradient(135deg,#fff 30%,var(--mut));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--mut);font-size:13px;margin:2px 0 0}
+.studio{display:grid;grid-template-columns:minmax(0,1.2fr) 410px;gap:32px;align-items:start}
+
+/* Phone Mockup Preview */
+.pv{position:sticky;top:20px}
+.phone-wrap{width:100%;max-width:390px;margin:0 auto}
+.phone{direction:ltr;aspect-ratio:9/16;width:100%;border-radius:30px;overflow:hidden;border:2px solid rgba(255,255,255,.14);background:#000;box-shadow:0 24px 50px -15px rgba(0,0,0,.9);position:relative}
+canvas{display:block;width:100%;height:100%;cursor:pointer;touch-action:none}
+.bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;margin-top:14px;justify-content:center}
+.play{width:48px;height:48px;border-radius:50%;border:0;background:var(--fg);color:var(--bg);cursor:pointer;display:grid;place-items:center;flex:none;transition:transform .15s}
+.play:active{transform:scale(.92)}.play:disabled{opacity:.35;cursor:default}
+.time{direction:ltr;font-variant-numeric:tabular-nums;color:var(--mut);font-size:13px;font-weight:600}
+
+/* Boxes & Inputs */
+.box{background:var(--card);border:1px solid var(--border);border-radius:var(--rad);padding:16px;margin-bottom:16px}
+.box-title{font-size:13.5px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label.field{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--mut)}
+input[type=text],input[type=number],select{font:inherit;font-size:13px;color:var(--fg);background:#0c0f17;border:1px solid var(--line);border-radius:10px;padding:8px 12px;outline:none;transition:border-color .2s}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--ai-glow)}
+
+/* Audio Slots */
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.slot{position:relative;display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--rad);transition:all .2s}
+.slot:hover,.slot.drag{border-color:var(--c);box-shadow:0 0 16px -4px var(--c)}
+.slot.ai{--c:var(--ai);--glow:var(--ai-glow)}.slot.hu{--c:var(--hu);--glow:var(--hu-glow)}
+.slot-top{display:flex;align-items:center;gap:10px}
+.slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--glow);flex:none}
+.slot b{display:block;font-weight:700;font-size:13.5px}
+.slot small{display:block;color:var(--mut);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:right}
+.slot-tools{display:flex;align-items:center;gap:10px;z-index:3;margin-top:4px}
+
+/* Range Slider with Boost */
+.vol-row{display:flex;align-items:center;gap:10px;width:100%;font-size:12px;color:var(--mut)}
+.vol-row span{flex:none;min-width:65px}
+.vol-row input[type=range]{flex:1;accent-color:var(--c);cursor:pointer}
+.vol-val{flex:none;min-width:38px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--fg);direction:ltr;text-align:right}
+
+/* Asset Cards */
+.assets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.file-card{position:relative;padding:12px;border:1px dashed var(--line);border-radius:12px;background:#0c0f17;cursor:pointer;text-align:center;transition:border-color .2s}
+.file-card:hover{border-color:var(--ai-glow)}
+.file-card input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.file-card b{display:block;font-size:12px}
+.file-card small{display:block;color:var(--mut);font-size:10.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Cues Table */
+.cue-toolbar{display:flex;gap:8px;margin-bottom:12px}
+.cue-list{max-height:280px;overflow-y:auto;padding-inline-end:4px}
+.cue{display:grid;grid-template-columns:82px 70px 70px 1fr 30px;gap:6px;align-items:center;padding:7px;background:#0c0f17;border:1px solid var(--line);border-inline-start:4px solid var(--c);border-radius:10px;margin-bottom:6px;transition:all .2s}
+.cue.ai{--c:var(--ai)}.cue.hu{--c:var(--hu)}.cue.on{border-color:var(--c);background:rgba(255,255,255,.04)}
+.cue input[type=number]{padding:4px 6px;text-align:center}
+.cue input.tx{padding:5px 9px}
+.btn-del{border:0;background:transparent;color:var(--mut);font-size:18px;cursor:pointer;border-radius:6px;line-height:1}.btn-del:hover{color:#f43f5e}
+
+/* Buttons & CTA */
+.btn{font:inherit;font-size:12.5px;font-weight:600;color:var(--fg);background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+.btn:hover{background:rgba(255,255,255,.12);border-color:var(--mut)}
+.btn-vad{background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(244,63,94,.15));border-color:rgba(255,255,255,.2);color:#fff}
+.cta{width:100%;font:inherit;font-weight:700;font-size:15px;border:0;border-radius:14px;padding:14px;cursor:pointer;color:#fff;background:linear-gradient(90deg,var(--ai),var(--hu));box-shadow:0 4px 20px -4px rgba(2,132,199,.5);transition:.2s;margin-top:6px}
+.cta:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px -3px rgba(244,63,94,.5)}
+.cta:disabled{opacity:.35;cursor:default;transform:none}
+.pg{height:7px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:12px;overflow:hidden}
+.pg i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ai-glow),var(--hu-glow));transition:width .1s linear}
+.hint{font-size:12px;color:var(--mut);margin-top:6px;line-height:1.6}
+.badge-save{font-size:11px;padding:2px 8px;border-radius:6px;background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+</style>
+</head>
+<body>
+<main>
+<div class="header-row">
+    <div>
+      <h1>استودیوی ویدیوی اِما</h1>
+      <p class="sub">موتور اختصاصی تولید ریلز و استوری عمودی ۱۰۸۰×۱۹۲۰</p>
+    </div>
+    
+    <!-- دکمه ذخیره همه‌جانبه پروژه و وضعیت -->
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="badge-save" id="saveStatus">تنظیمات آماده است</span>
+      <button class="btn btn-primary" id="btnMasterSave" style="background:#10b981;padding:8px 18px;font-size:13.5px;font-weight:700">
+        💾 ذخیره تمام تنظیمات و پروژه
+      </button>
+    </div>
+  </div>
+
+  <div class="studio">
+    <!-- کنترل‌ها -->
+    <section class="ctl">
+      
+      <!-- ۱. فایل‌های صوتی و تنظیم ولوم تقویت‌شده -->
+      <div class="pick">
+        <!-- صدای AI -->
+        <div class="slot ai" id="slotAi">
+          <input type="file" accept="audio/*" data-k="ai">
+          <div class="slot-top">
+            <span class="dot"></span>
+            <div><b>صدای هوش مصنوعی</b><small id="smAi">انتخاب یا درگ فایل</small></div>
+          </div>
+          <div class="slot-tools">
+            <div class="vol-row">
+              <span>ولوم AI:</span>
+              <input type="range" id="volAi" min="0" max="3" step="0.05" value="1">
+              <span class="vol-val" id="volValAi">۱۰۰٪</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- صدای انسان -->
+        <div class="slot hu" id="slotHu">
+          <input type="file" accept="audio/*" data-k="hu">
+          <div class="slot-top">
+            <span class="dot"></span>
+            <div><b>صدای انسان</b><small id="smHu">انتخاب یا درگ فایل</small></div>
+          </div>
+          <div class="slot-tools">
+            <div class="vol-row">
+              <span>ولوم انسان:</span>
+              <input type="range" id="volHu" min="0" max="3" step="0.05" value="1.8">
+              <span class="vol-val" id="volValHu">۱۸۰٪</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+<!-- فیلدهای اختصاصی متن و نشانگر زنده -->
+      <div class="box">
+        <div class="box-title">فیلدهای اختصاصی متن و برچسب (موقعیت دلخواه X / Y)</div>
+
+        <!-- فیلد یک: متن ساده سفید -->
+        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:8px;color:#38bdf8">۱. فیلد متن ساده سفید</div>
+          <div class="grid-2">
+            <label class="field">متن فیلد (در صورت خالی بودن نمایش داده نمی‌شود)
+              <input type="text" id="cf1Text" placeholder="مثلاً: نکات کلیدی مکالمه...">
+            </label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+              <label class="field">سایز متن<input type="number" id="cf1Size" value="38" min="14" max="150"></label>
+              <label class="field">موقعیت X<input type="number" id="cf1X" value="540" title="مرکز: ۵۴۰"></label>
+              <label class="field">موقعیت Y<input type="number" id="cf1Y" value="440" title="ارتفاع"></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- فیلد دو: کادر کپسولی با نقطه قرمز چشمک‌زن -->
+        <div>
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:8px;color:#fb7185">۲. نشانگر کپسولی با نقطه قرمز چشمک‌زن</div>
+          <div class="grid-2">
+            <label class="field">متن داخل نشانگر (در صورت خالی بودن نمایش داده نمی‌شود)
+              <input type="text" id="cf2Text" placeholder="مثلاً: گفتگوی زنده هوش مصنوعی">
+            </label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+              <label class="field">سایز متن<input type="number" id="cf2Size" value="28" min="14" max="120"></label>
+              <label class="field">موقعیت X<input type="number" id="cf2X" value="540" title="مرکز: ۵۴۰"></label>
+              <label class="field">موقعیت Y<input type="number" id="cf2Y" value="510" title="ارتفاع"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- ۲. مشخصات برند و انتخاب تمپلیت -->
+   <!-- ۲. مشخصات برند و انتخاب تمپلیت -->
+    <!-- ۲. مشخصات برند و انتخاب تمپلیت -->
+      <div class="box">
+        <div class="box-title">برند و قالب بصری</div>
+        
+        <!-- نام برند با کنترل سایز و مختصات X و Y -->
+        <div class="grid-2">
+          <label class="field">نام برند / گوینده اصلی
+            <input type="text" id="bn" value="اِما">
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <label class="field">سایز نام<input type="number" id="bnSize" value="115" min="30" max="220" title="سایز فونت"></label>
+            <label class="field">موقعیت X<input type="number" id="bnX" value="540" title="افقی (مرکز: ۵۴۰)"></label>
+            <label class="field">موقعیت Y<input type="number" id="bnY" value="280" title="عمودی"></label>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:10px">
+          <label class="field">شعار ثابت پیش‌فرض
+            <input type="text" id="bt" value="دستیار صوتی و هوشمند هوش مصنوعی">
+          </label>
+          <label class="field">قالب ظاهری ویدیو (Template)
+            <select id="templateSelect"></select>
+          </label>
+        </div>
+
+        <!-- بخش شعارها و زیرتیترهای پویای زمان‌بندی‌شده -->
+        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+          <div class="box-title" style="margin-bottom:8px">
+            <span style="font-size:12.5px;color:var(--mut)">شعارها و زیرتیترهای پویا (تایپوگرافی متغیر) ✨</span>
+            <button class="btn btn-sm" id="addDynamicTagBtn">+ افزودن در ثانیه فعلی</button>
+          </div>
+          <div class="cue-list" id="dynamicTagsList" style="max-height:190px"></div>
+          <p class="hint">ستون‌ها: متن، شروع (ثانیه)، پایان، سایز، موقعیت X، موقعیت Y و انیمیشن.</p>
+        </div>
+      </div>
+
+      <!-- ۳. تصاویر و لوگو -->
+      <div class="box">
+        <div class="box-title">تصاویر پروفایل و لوگو</div>
+        <div class="assets">
+          <label class="file-card"><input type="file" accept="image/*" data-i="ai"><b>پروفایل AI</b><small id="nm-ai">پیش‌فرض</small></label>
+          <label class="file-card"><input type="file" accept="image/*" data-i="hu"><b>پروفایل انسان</b><small id="nm-hu">پیش‌فرض</small></label>
+          <label class="file-card"><input type="file" accept="image/*" data-i="logo"><b>لوگوی پایین</b><small id="nm-logo">انتخاب فایل</small></label>
+        </div>
+        <div class="vol-row" style="margin-top:12px">
+          <span style="min-width:85px">اندازه‌ی لوگو:</span>
+          <input type="range" id="ls" min="80" max="320" value="160">
+          <span class="vol-val" id="lsVal">۱۶۰px</span>
+        </div>
+
+        <!-- متن فوتر پایین (آیدی، سایت، کپی‌رایت و...) -->
+        <div class="grid-2" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+          <label class="field">متن پایین ویدیو (آیدی اینستاگرام، سایت و...)
+            <input type="text" id="ftText" placeholder="مثلاً: @my_page یا www.site.com">
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <label class="field">سایز متن فوتر<input type="number" id="ftSize" value="32" min="16" max="90"></label>
+            <label class="field">موقعیت عمودی Y<input type="number" id="ftY" value="1855" title="ارتفاع (انتهای کادر: ۱۸۵۰ تا ۱۸۹۰)"></label>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- ۴. زیرنویس و سکانس‌ها -->
+  <!-- ۴. زیرنویس و سکانس‌ها -->
+      <div class="box">
+        <div class="box-title">
+          <span>زیرنویس و تایمینگ</span>
+          <button class="btn btn-vad" id="autoVad">تشخیص هوشمند سکانس‌ها 🪄</button>
+        </div>
+        <div class="cue-toolbar">
+          <button class="btn" id="addCue">+ افزودن خط دستی</button>
+          <button class="btn" id="clearCues" style="color:#f43f5e">پاکسازی همه</button>
+        </div>
+        <div class="cue-list" id="cues"></div>
+      </div>
+
+
+<!-- پنل برش و گلچین هوشمند ریلز (Trim & Clip) -->
+        <div style="background:#0c0f17;border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:13px;color:#fff">
+              <input type="checkbox" id="trimEnable" style="width:16px;height:16px;accent-color:var(--ai-glow)">
+              فعال‌سازی برش و خروجی تکه‌ای (Trim Clip) ✂️
+            </label>
+            <span id="trimDurationBadge" style="font-size:11.5px;color:var(--ai-glow);font-weight:600">طول کلیپ: کامل</span>
+          </div>
+
+          <div id="trimControls" style="display:none;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <label class="field">شروع کلیپ (ثانیه)
+                <div style="display:flex;gap:6px">
+                  <input type="number" step="0.1" min="0" id="trimStart" value="0">
+                  <button class="btn btn-sm" id="btnSetTrimStart" title="ثبت از ثانیه فعلی پلیر">⏱ فعلی</button>
+                </div>
+              </label>
+            </div>
+            <div>
+              <label class="field">پایان کلیپ (ثانیه)
+                <div style="display:flex;gap:6px">
+                  <input type="number" step="0.1" min="0" id="trimEnd" value="30">
+                  <button class="btn btn-sm" id="btnSetTrimEnd" title="ثبت در ثانیه فعلی پلیر">⏱ فعلی</button>
+                </div>
+              </label>
+            </div>
+            <div style="grid-column:1/-1;display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-sm" id="btnPreviewTrim" style="flex:1;background:rgba(56,189,248,0.15);border-color:rgba(56,189,248,0.3);color:var(--ai-glow)">
+                ▶️ پخش آزمایشی این بازه انتخابی
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+
+      <!-- ۵. ایموجی‌های متحرک و ری‌اکشن دستی -->
+      <div class="box">
+        <div class="box-title">
+          <span>ایموجی‌های متحرک و ری‌اکشن 🎭</span>
+        </div>
+        <div class="cue-toolbar" style="align-items:center;flex-wrap:wrap">
+          <button class="btn" id="addEmojiBtn">+ افزودن در ثانیه فعلی</button>
+          
+          <!-- دکمه‌های سریع برای ایموجی‌های محبوب -->
+          <div style="display:flex;gap:4px;margin-inline-start:auto" id="quickEmojiBar">
+            <button class="btn btn-sm quick-emoji" data-e="😂" title="خنده">😂</button>
+            <button class="btn btn-sm quick-emoji" data-e="⚡" title="جرقه و شوک">⚡</button>
+            <button class="btn btn-sm quick-emoji" data-e="💭" title="تفکر">💭</button>
+            <button class="btn btn-sm quick-emoji" data-e="🔥" title="آتش">🔥</button>
+            <button class="btn btn-sm quick-emoji" data-e="❤️" title="قلب">❤️</button>
+            <button class="btn btn-sm quick-emoji" data-e="👏" title="تشویق">👏</button>
+          </div>
+          <button class="btn btn-sm" id="clearEmojis" style="color:#f43f5e">پاکسازی</button>
+        </div>
+
+        <!-- لیست ایموجی‌های ثبت‌شده -->
+        <div class="cue-list" id="emojiList" style="max-height:190px"></div>
+      </div>
+
+
+
+
+      <!-- ۵. خروجی و ذخیره در پوشه projects -->
+      <div class="box">
+        <div class="box-title">ساخت ویدیو و ذخیره در projects/</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+          <button class="btn" id="btnPickFolder">انتخاب پوشه projects در مک 📁</button>
+          <span class="hint" id="folderPathHint" style="margin:0">پوشه انتخاب نشده (دانلود مستقیم انجام می‌شود)</span>
+        </div>
+        <button class="cta" id="exp" disabled>رندر و ایجاد بسته پروژه (Project Folder)</button>
+        <div class="pg"><i id="pgi"></i></div>
+        <p class="hint" id="st">برای شروع، فایل‌های صوتی AI و انسان را انتخاب کنید.</p>
+      </div>
+
+    </section>
+
+    <!-- پیش‌نمایش ۹:۱۶ -->
+    <section class="pv">
+      <div class="phone-wrap">
+        <div class="phone">
+          <canvas id="cv" width="1080" height="1920" aria-label="پیش‌نمایش ویدیو"></canvas>
+        </div>
+      </div>
+      <div class="bar">
+        <button class="play" id="play" disabled aria-label="پخش/مکث">
+          <svg id="ic" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <span class="time" id="time">00:00 / 00:00</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+
+
+
+
+
+<!-- لود موتور پروژه به صورت ماژول استاندارد جاوااسکریپت -->
+<script type="module" src="./app.js"></script>
+</body>
+</html>
